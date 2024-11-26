@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>img/Aircraft control panel wallpaper.jpg</file>
+        <file>img/flight-icon.jfif</file>
+    </qresource>
+</RCC>

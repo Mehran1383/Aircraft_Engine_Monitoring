@@ -1,9 +1,12 @@
 QT       += core gui
 QT       += serialport
+QT       += widgets
+QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++11
+DEFINES += QT_NO_DEBUG_OUTPUT
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -17,16 +20,41 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    gaugewidget.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    process_message.cpp \
+    qcustomplot.cpp \
+    sensorerrortable.cpp \
+    settingsdialog.cpp
 
 HEADERS += \
-    mainwindow.h
+    gaugewidget.h \
+    mainwindow.h \
+    process_message.h \
+    qcustomplot.h \
+    sensorerrortable.h \
+    settingsdialog.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    sensorerrortable.ui \
+    settingsdialog.ui
+
+include(FlatTabWidget/FlatTabWidget.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    img/Aircraft control panel wallpaper.jpg \
+    img/Aircraft control panel wallpaper.png \
+    img/Aircraft control panel wallpaper.png \
+    img/Aircraft control panel wallpaper.png \
+    img/Aircraft control panel wallpaper.png
+
+RESOURCES += \
+    resources.qrc
+

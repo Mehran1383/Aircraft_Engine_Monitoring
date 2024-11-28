@@ -13,6 +13,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     m_intValidator(new QIntValidator(0, 4000000, this))
 {
     m_ui->setupUi(this);
+    setWindowFlag(Qt::WindowStaysOnTopHint);
+    setWindowIcon(QIcon(":/img/img/flight-icon.jfif"));
 
     m_ui->notification->setDown(0);
 

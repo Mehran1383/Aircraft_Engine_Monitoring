@@ -1,14 +1,13 @@
 #ifndef PROCESS_MESSAGE_H
 #define PROCESS_MESSAGE_H
 
-#include <QThread>
+
 #include <stdint.h>
 #include <QString>
 #include <QMutex>
 #include <QWidget>
 #include <QMap>
 
-#include "gaugewidget.h"
 
 #define HEADER_VALUE 0xa5
 #define FOOTER_VALUE 0x55
@@ -45,15 +44,17 @@
 #define BODY_TEMP_SENSOR_ERROR          0x1e
 #define AIR_TEMP_SENSOR_ERROR           0x1f
 
-class Process_message : public QThread
+class Process_message : public QObject
 {
+    Q_OBJECT
+
 public:
     Process_message();
 
     void packData32(char byte1, char byte2, char byte3, char byte4, uint32_t* data);
     void packData16(char byte1, char byte2, uint16_t* data);
     void setRawData(QByteArray data);
-    void setSpeedNeedle(QcNeedleItem *SpeedNeedle);
+    QMap<char,float> getFlags();
     void processData();
 
 private:
@@ -61,8 +62,10 @@ private:
     QByteArray rawData;
     QMutex m_mtx;
     QMap<char,float> flag;
-    QcNeedleItem *m_SpeedNeedle;
 
+signals:
+    void updateGauge();
+    void updatePlot();
 };
 
 

@@ -10,22 +10,23 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle(tr("Flight Control"));
+    setWindowIcon(QIcon(":/img/img/flight-icon.jfif"));
 
     // Create Gauge Widgets
-    m_OilPressureGauge = new QcGaugeWidget;
-    m_OilPressureNeedle = new QcNeedleItem;
+    m_OilPressureGauge = new QcGaugeWidget(this);
+    m_OilPressureNeedle = new QcNeedleItem(m_OilPressureGauge);
 
-    m_OilTemperatureGauge = new QcGaugeWidget;
-    m_OilTemperatureNeedle = new QcNeedleItem;
+    m_OilTemperatureGauge = new QcGaugeWidget(this);
+    m_OilTemperatureNeedle = new QcNeedleItem(m_OilTemperatureGauge);
 
-    m_FuelGauge = new QcGaugeWidget;
-    m_FuelNeedle = new QcNeedleItem;
+    m_FuelGauge = new QcGaugeWidget(this);
+    m_FuelNeedle = new QcNeedleItem(m_FuelGauge);
 
-    m_TorqueGauge = new QcGaugeWidget;
-    m_TorqueNeedle = new QcNeedleItem;
+    m_TorqueGauge = new QcGaugeWidget(this);
+    m_TorqueNeedle = new QcNeedleItem(m_TorqueGauge);
 
-    m_MotorSpeedGauge = new QcGaugeWidget;
-    m_MotorSpeedNeedle = new QcNeedleItem;
+    m_MotorSpeedGauge = new QcGaugeWidget(this);
+    m_MotorSpeedNeedle = new QcNeedleItem(m_MotorSpeedGauge);
 
     // Color settings
     QList<QPair<QColor,float>> OilPressure_color, OilTemperature_color, Fuel_color, Torque_color, MotorSpeed_color;
@@ -85,14 +86,17 @@ MainWindow::MainWindow(QWidget *parent)
 
     main_widget.setLayout(&main_layout);
 
-
-    ui->widget->addPage("Sensor Error",&sensor_error);
+    ui->widget->addPage("Table panel",&sensor_error);
 
     // Add main widget to widget container
     ui->widget->addPage("Gauge Panel", &main_widget);
 
     // Plot setup
     createPlot(&plot);
+    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
+    timeTicker->setTimeFormat("%h:%m:%s");
+    plot.xAxis->setTicker(timeTicker);
+    plot.axisRect()->setupFullAxesBox();
     plot_layout.addWidget(&plot);
     plot_widget.setLayout(&plot_layout);
     ui->widget->addPage("Plot Panel", &plot_widget);
@@ -102,25 +106,57 @@ MainWindow::MainWindow(QWidget *parent)
     createTrayIcon();
     m_trayIcon->show();
     m_trayIcon->setIcon(QIcon(":/img/img/flight-icon.jfif"));
-    setWindowIcon(QIcon(":/img/img/flight-icon.jfif"));
 
     // Initialize connection status and message handler
     connection_status = 0;
     messageHandler = new Process_message;
-    messageHandler->setSpeedNeedle(this->m_OilPressureNeedle);
 
     // Create thread for message handler
-    thread = new QThread;
-    messageHandler->moveToThread(thread);
-    thread->start();
+    process_thread = new QThread;
+    messageHandler->moveToThread(process_thread);
+    process_thread->start();
 
-    // Serial port and timer setup
+    // Serial port setup and create thread for it
     m_port = new QSerialPort(this);
+    serial_thread = new QThread;
+    m_port->moveToThread(serial_thread);
+    serial_thread->start();
+
+    // ScanTimer setup and create thread for it
     m_ScanTimer = new QTimer(this);
+    timer_thread = new QThread;
+    m_ScanTimer->moveToThread(timer_thread);
+    timer_thread->start();
     m_ScanTimer->setInterval(20);
-    connect(m_ScanTimer, &QTimer::timeout, this, &MainWindow::wait_for_data);
-    connect(m_port, &QSerialPort::readyRead, this, &MainWindow::read_data);
-    connect(this, &MainWindow::startProcess, messageHandler, &Process_message::processData);
+
+    plot.setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(m_ScanTimer, &QTimer::timeout,
+            this, &MainWindow::wait_for_data);
+
+    connect(m_port, &QSerialPort::readyRead,
+            this, &MainWindow::read_data);
+
+    connect(this, &MainWindow::startProcess,
+            messageHandler, &Process_message::processData);
+
+    connect(messageHandler, &Process_message::updateGauge,
+            this, &MainWindow::updateGaugePanel);
+
+    connect(messageHandler, &Process_message::updatePlot,
+            this, &MainWindow::updatePlotPanel);
+
+    connect(&plot, SIGNAL(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*,QMouseEvent*)),
+            this, SLOT(legendDoubleClick(QCPAbstractLegendItem*)));
+
+    connect(&plot, SIGNAL(customContextMenuRequested(QPoint)),
+             this, SLOT(contextMenuRequest(QPoint)));
+
+    connect(plot.xAxis, SIGNAL(rangeChanged(QCPRange)),
+            plot.xAxis2, SLOT(setRange(QCPRange)));
+
+    connect(plot.yAxis, SIGNAL(rangeChanged(QCPRange)),
+            plot.yAxis2, SLOT(setRange(QCPRange)));
 }
 
 
@@ -130,8 +166,14 @@ MainWindow::~MainWindow()
     disconnect(m_port, &QSerialPort::readyRead, this, &MainWindow::read_data);
     disconnect(this, &MainWindow::startProcess, messageHandler, &Process_message::processData);
 
-    thread->quit();
-    thread->wait();
+    process_thread->quit();
+    process_thread->wait();
+
+    timer_thread->quit();
+    timer_thread->wait();
+
+    serial_thread->quit();
+    serial_thread->wait();
 
     delete messageHandler;
     delete m_port;
@@ -155,15 +197,25 @@ void MainWindow::read_data()
 
 void MainWindow::on_connectButton_clicked()
 {
+    const SettingsDialog::Settings setting = m_settings->settings();
+
     if (connection_status) {
         qDebug() << "disconnecting!";
         m_port->close();
         connection_status = 0;
         m_ScanTimer->stop();
+        if(setting.notification){
+            showMessage("Disconnected", m_port->portName() + " closed");
+        }
+
+        m_OilPressureNeedle->setCurrentValue(0);
+        m_OilTemperatureNeedle->setCurrentValue(0);
+        m_FuelNeedle->setCurrentValue(0);
+        m_TorqueNeedle->setCurrentValue(0);
+        m_MotorSpeedNeedle->setCurrentValue(0);
         return;
     }
 
-    const SettingsDialog::Settings setting = m_settings->settings();
     m_port->setPortName(setting.name);
     m_port->setBaudRate(setting.baudRate);
     m_port->setDataBits(setting.dataBits);
@@ -176,7 +228,7 @@ void MainWindow::on_connectButton_clicked()
         connection_status = 1;
         m_ScanTimer->start();
         if(setting.notification){
-            showMessage("Connected Successfully", setting.name);
+            showMessage("Connected Successfully", m_port->portName());
         }
     } else {
         qDebug() << "SERIAL: ERROR!";
@@ -188,8 +240,30 @@ void MainWindow::on_connectButton_clicked()
 void MainWindow::wait_for_data()
 {
     if(m_port->isOpen()){
-        m_port->waitForReadyRead(1);
+        m_port->waitForReadyRead(20);
     }
+}
+
+void MainWindow::updateGaugePanel()
+{
+    QMap<char,float> map = messageHandler->getFlags();
+    m_OilPressureNeedle->setCurrentValue(map[char(OIL_PRESSURE)]);
+    m_OilTemperatureNeedle->setCurrentValue(map[char(OIL_TEMPERATURE)]);
+    m_FuelNeedle->setCurrentValue(map[char(FUEL)]);
+    m_TorqueNeedle->setCurrentValue(map[char(TORQUE)]);
+    m_MotorSpeedNeedle->setCurrentValue(map[char(MOTOR_SPEED)]);
+}
+
+void MainWindow::updatePlotPanel()
+{
+    QMap<char,float> map = messageHandler->getFlags();
+    static QTime time = QTime::currentTime();
+    double key = time.elapsed()/1000.0;
+    plot.graph(0)->addData(key, double(map[char(OIL_PRESSURE)]));
+    plot.graph(1)->addData(key, double(map[char(OIL_TEMPERATURE)]));
+    plot.graph(2)->addData(key, double(map[char(FUEL)]));
+    plot.graph(3)->addData(key, double(map[char(TORQUE)]));
+    plot.graph(4)->addData(key, double(map[char(MOTOR_SPEED)]));
 }
 
 void MainWindow::createGauge(QcGaugeWidget* m_gauge, QcNeedleItem* m_needle, QString title, int range, QList<QPair<QColor,float>> colorList)
@@ -215,7 +289,7 @@ void MainWindow::createGauge(QcGaugeWidget* m_gauge, QcNeedleItem* m_needle, QSt
     m_gauge->addLabel(70)->setText(title);
     QcLabelItem *lab = m_gauge->addLabel(35);
     lab->setText("0");
-    m_needle = m_gauge->addNeedle(60);
+    m_gauge->addNeedle(60, m_needle);
     m_needle->setLabel(lab);
     m_needle->setColor(Qt::white);
     m_needle->setValueRange(0,range);
@@ -228,11 +302,29 @@ void MainWindow::createPlot(QCustomPlot* plot)
 {
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::blue));
-    plot->graph()->setBrush(QBrush(QColor(0, 0, 255, 20)));
+    plot->graph(0)->setName("OIL PRESSURE");
+    plot->graph(0)->setVisible(1);
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::red));
+    plot->graph(1)->setName("OIL TEMPERATURE");
+    plot->addGraph();
+    plot->graph()->setPen(QPen(Qt::green));
+    plot->graph(2)->setName("FUEL");
+    plot->addGraph();
+    plot->graph()->setPen(QPen(Qt::yellow));
+    plot->graph(3)->setName("TORQUE");
+    plot->addGraph();
+    plot->graph()->setPen(QPen(Qt::darkCyan));
+    plot->graph(4)->setName("MOTOR SPEED");
     plot->axisRect()->setupFullAxesBox(true);
-    plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
+                          QCP::iSelectLegend | QCP::iSelectPlottables);
+    plot->legend->setVisible(1);
+    plot->legend->setBrush(QColor(255, 255, 255, 150));
+    plot->yAxis->setRange(0, 1000);
+    plot->xAxis->setLabel("time");
+    plot->yAxis->setLabel("sensor value");
+    plot->legend->setSelectableParts(QCPLegend::spItems);
 }
 
 void MainWindow::on_setting_clicked()
@@ -281,5 +373,46 @@ void MainWindow::createTrayIcon()
 
     // Make the tray icon visible
     m_trayIcon->setVisible(true);
+}
+
+void MainWindow::legendDoubleClick(QCPAbstractLegendItem *item)
+{
+    if(item->visible()){
+        item->setVisible(0);
+    }
+    else{
+        item->setVisible(1);
+    }
+}
+
+void MainWindow::contextMenuRequest(QPoint pos)
+{
+  QMenu *menu = new QMenu(this);
+  menu->setAttribute(Qt::WA_DeleteOnClose);
+
+  if (plot.legend->selectTest(pos, false) >= 0)
+  {
+    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
+    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
+    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
+    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
+    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
+  }
+
+  menu->popup(plot.mapToGlobal(pos));
+}
+
+void MainWindow::moveLegend()
+{
+  if (QAction* contextAction = qobject_cast<QAction*>(sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
+  {
+    bool ok;
+    int dataInt = contextAction->data().toInt(&ok);
+    if (ok)
+    {
+      plot.axisRect()->insetLayout()->setInsetAlignment(0, (Qt::Alignment)dataInt);
+      plot.replot();
+    }
+  }
 }
 

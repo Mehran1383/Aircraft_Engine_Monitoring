@@ -8,6 +8,7 @@
 #include <QSystemTrayIcon>
 #include <QHBoxLayout>
 #include <QGroupBox>
+#include <QDateTime>
 
 #include "process_message.h"
 #include "gaugewidget.h"
@@ -38,6 +39,11 @@ public slots:
     void on_setting_clicked();
     void read_data();
     void wait_for_data();
+    void legendDoubleClick(QCPAbstractLegendItem* item);
+    void contextMenuRequest(QPoint pos);
+    void moveLegend();
+    void updateGaugePanel();
+    void updatePlotPanel();
 
 signals:
     void startProcess();
@@ -48,7 +54,9 @@ private:
     QList<QSerialPortInfo> m_portList;
     QTimer* m_ScanTimer;
     Process_message* messageHandler;
-    QThread* thread;
+    QThread* process_thread;
+    QThread* serial_thread;
+    QThread* timer_thread;
     QcGaugeWidget* m_OilPressureGauge;
     QcNeedleItem* m_OilPressureNeedle;
     QcGaugeWidget* m_OilTemperatureGauge;

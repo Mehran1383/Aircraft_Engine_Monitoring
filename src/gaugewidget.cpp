@@ -52,12 +52,10 @@ QcColorBand *QcGaugeWidget::addColorBand(float position, QList<QPair<QColor,floa
     return item;
 }
 
-QcNeedleItem *QcGaugeWidget::addNeedle(float position)
+void QcGaugeWidget::addNeedle(float position, QcNeedleItem* item)
 {
-    QcNeedleItem * item = new QcNeedleItem(this);
     item->setPosition(position);
     mItems.append(item);
-    return item;
 }
 
 QcLabelItem *QcGaugeWidget::addLabel(float position)

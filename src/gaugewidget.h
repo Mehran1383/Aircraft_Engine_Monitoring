@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QRectF>
 #include <QtMath>
-#include <QtPrintSupport>
+
 
 
 #if defined(QCGAUGE_COMPILE_LIBRARY)
@@ -42,7 +42,7 @@ public:
     QcValuesItem* addValues(float position);
     QcArcItem* addArc(float position);
     QcColorBand* addColorBand(float position, QList<QPair<QColor,float>>);
-    QcNeedleItem* addNeedle(float position);
+    void addNeedle(float position, QcNeedleItem* item);
     QcLabelItem* addLabel(float position);
     QcGlassItem* addGlass(float position);
     QcAttitudeMeter* addAttitudeMeter(float position);

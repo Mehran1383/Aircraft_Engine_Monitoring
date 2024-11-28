@@ -1,6 +1,9 @@
 #include "process_message.h"
 
 #include <QDebug>
+#include <windows.h>
+#include <unistd.h>
+#include <QThread>
 
 Process_message::Process_message()
 {
@@ -44,14 +47,16 @@ void Process_message::setRawData(QByteArray data)
     this->rawData = data;
 }
 
-void Process_message::setSpeedNeedle(QcNeedleItem *SpeedNeedle)
+QMap<char,float> Process_message::getFlags()
 {
-    this->m_SpeedNeedle = SpeedNeedle;
+    return this->flag;
 }
 
 void Process_message::processData()
 {
     m_mtx.lock();
+
+    qDebug() << "inside";
 
     int index = 0;
     uint16_t sum = 0;
@@ -60,21 +65,24 @@ void Process_message::processData()
     uint32_t data = 0;
     uint32_t factor = 0;
     float real_data;
+    QMap<char,float> received_data;
 
     for( ; index < 4 ; index++){
         if(rawData[index] != char(HEADER_VALUE)){
             m_mtx.unlock();
+            qDebug() << "header";
             return;
         }
     }
 
-    if(MSG_counter == int(rawData[index])){
+    if(MSG_counter == uint8_t(rawData[index])){
         m_mtx.unlock();
+        qDebug() << "msg_counter";
         return;
     }
     else{
         sum += rawData[index];
-        MSG_counter = int(rawData[index++]);
+        MSG_counter = uint8_t(rawData[index++]);
     }
 
     sum += rawData[index];
@@ -82,13 +90,15 @@ void Process_message::processData()
 
     if(rawData[18 + (ID_Number - 1) * 10] != char(FOOTER_VALUE)){
         m_mtx.unlock();
+        qDebug() << "footer";
         return;
     }
 
     while(index <= 15 + (ID_Number - 1) * 10){
 
         if(rawData[index] == char(OIL_PRESSURE)){
-            sum += uint16_t(rawData[index]);
+            qDebug() << "OIL_PRESSURE";
+            sum += uint8_t(rawData[index] & 0x00FF);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
             sum += data;
@@ -99,7 +109,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1000){
-                    flag[char(OIL_PRESSURE)] = real_data;
+                    received_data[char(OIL_PRESSURE)] = real_data;
                 }
             }
         }
@@ -116,7 +126,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 400){
-                    flag[char(OIL_TEMPERATURE)] = real_data;
+                    received_data[char(OIL_TEMPERATURE)] = real_data;
                 }
             }
         }
@@ -133,7 +143,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 800){
-                    flag[char(FUEL_FLOW)] = real_data;
+                    received_data[char(FUEL_FLOW)] = real_data;
                 }
             }
         }
@@ -150,7 +160,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 800){
-                    flag[char(FUEL)] = real_data;
+                    received_data[char(FUEL)] = real_data;
                 }
             }
         }
@@ -167,7 +177,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 400){
-                    flag[char(EGT)] = real_data;
+                    received_data[char(EGT)] = real_data;
                 }
             }
         }
@@ -184,7 +194,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 400){
-                    flag[char(TORQUE)] = real_data;
+                    received_data[char(TORQUE)] = real_data;
                 }
             }
         }
@@ -201,7 +211,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 400){
-                    flag[char(INDICATED_POWER)] = real_data;
+                    received_data[char(INDICATED_POWER)] = real_data;
                 }
             }
         }
@@ -218,7 +228,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 400){
-                    flag[char(FRICTIONAL_POWER)] = real_data;
+                    received_data[char(FRICTIONAL_POWER)] = real_data;
                 }
             }
         }
@@ -235,7 +245,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 100){
-                    flag[char(THERMAL_EFFICIENCY)] = real_data;
+                    received_data[char(THERMAL_EFFICIENCY)] = real_data;
                 }
             }
         }
@@ -252,7 +262,7 @@ void Process_message::processData()
             if(factor != 0){
                 float real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 20){
-                    flag[char(AIR_FUEL_RATIO)] = real_data;
+                    received_data[char(AIR_FUEL_RATIO)] = real_data;
                 }
             }
         }
@@ -269,7 +279,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1000){
-                    flag[char(MOTOR_SPEED)] = real_data;
+                    received_data[char(MOTOR_SPEED)] = real_data;
                 }
             }
         }
@@ -286,7 +296,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1000){
-                    flag[char(OUTPUT_AIR_SPEED)] = real_data;
+                    received_data[char(OUTPUT_AIR_SPEED)] = real_data;
                 }
             }
         }
@@ -303,7 +313,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 100){
-                    flag[char(VIBRATION)] = real_data;
+                    received_data[char(VIBRATION)] = real_data;
                 }
             }
         }
@@ -320,7 +330,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 400){
-                    flag[char(BODY_TEMP)] = real_data;
+                    received_data[char(BODY_TEMP)] = real_data;
                 }
             }
         }
@@ -337,7 +347,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 400){
-                    flag[char(AIR_TEMP)] = real_data;
+                    received_data[char(AIR_TEMP)] = real_data;
                 }
             }
         }
@@ -354,7 +364,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(OIL_PRESSURE_SENSOR_ERROR)] = real_data;
+                    received_data[char(OIL_PRESSURE_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -371,7 +381,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(OIL_TEMPERATURE_SENSOR_ERROR)] = real_data;
+                    received_data[char(OIL_TEMPERATURE_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -388,7 +398,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(FUEL_FLOW_SENSOR_ERROR)] = real_data;
+                    received_data[char(FUEL_FLOW_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -405,7 +415,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(FUEL_SENSOR_ERROR)] = real_data;
+                    received_data[char(FUEL_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -422,7 +432,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(EGT_SENSOR_ERROR)] = real_data;
+                    received_data[char(EGT_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -439,7 +449,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(TORQUE_SENSOR_ERROR)] = real_data;
+                    received_data[char(TORQUE_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -456,7 +466,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(INDICATED_POWER_SENSOR_ERROR)] = real_data;
+                    received_data[char(INDICATED_POWER_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -473,7 +483,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(FRICTIONAL_POWER_SENSOR_ERROR)] = real_data;
+                    received_data[char(FRICTIONAL_POWER_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -490,7 +500,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(THERMAL_EFFICIENCY_SENSOR_ERROR)] = real_data;
+                    received_data[char(THERMAL_EFFICIENCY_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -507,7 +517,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(AIR_FUEL_RATIO_SENSOR_ERROR)] = real_data;
+                    received_data[char(AIR_FUEL_RATIO_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -524,7 +534,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(MOTOR_SPEED_SENSOR_ERROR)] = real_data;
+                    received_data[char(MOTOR_SPEED_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -541,7 +551,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(OUTPUT_AIR_SPEED_SENSOR_ERROR)] = real_data;
+                    received_data[char(OUTPUT_AIR_SPEED_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -558,7 +568,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(VIBRATION_SENSOR_ERROR)] = real_data;
+                    received_data[char(VIBRATION_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -575,7 +585,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(BODY_TEMP_SENSOR_ERROR)] = real_data;
+                    received_data[char(BODY_TEMP_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -592,7 +602,7 @@ void Process_message::processData()
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
                 if(real_data >= 0 && real_data <= 1){
-                    flag[char(AIR_TEMP_SENSOR_ERROR)] = real_data;
+                    received_data[char(AIR_TEMP_SENSOR_ERROR)] = real_data;
                 }
             }
         }
@@ -604,22 +614,29 @@ void Process_message::processData()
 
     packData16(rawData[index], rawData[index + 1], &checksum);
     if(checksum == sum){
-
+        for (auto it = received_data.begin(); it != received_data.end(); ++it) {
+            flag[it.key()] = it.value();
+            qDebug() << it.value();
+        }
+        emit updateGauge();
+        emit updatePlot();
     }
-
+    else {
+        qDebug() << "checksum";
+    }
 
     m_mtx.unlock();
 }
 
 void Process_message::packData32(char byte1, char byte2, char byte3, char byte4, uint32_t *data)
 {
-    uint32_t packedData = uint32_t(byte1) + (uint32_t(byte2) << 8) + (uint32_t(byte3) << 16) + (uint32_t(byte4) << 24);
+    uint32_t packedData = uint32_t((byte1 & 0x00FF) + ((byte2 & 0x00FF) << 8) + ((byte3 & 0x00FF) << 16) + ((byte4 & 0x00FF) << 24));
     *data = packedData;
 }
 
 void Process_message::packData16(char byte1, char byte2, uint16_t *data)
 {
-    uint16_t packedData = uint16_t(byte1) + (uint16_t(byte2) << 8);
+    uint16_t packedData = (byte1 & 0x00FF) + ((byte2 & 0x00FF) << 8);
     *data = packedData;
 }
 

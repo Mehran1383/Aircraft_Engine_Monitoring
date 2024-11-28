@@ -31,6 +31,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_3">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -49,7 +52,7 @@
         </size>
        </property>
        <property name="layoutDirection">
-        <enum>Qt::LayoutDirection::LeftToRight</enum>
+        <enum>Qt::LeftToRight</enum>
        </property>
        <property name="autoFillBackground">
         <bool>false</bool>
@@ -100,16 +103,13 @@ QTableWidget::item:pressed {
 </string>
        </property>
        <property name="frameShape">
-        <enum>QFrame::Shape::Box</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Shadow::Raised</enum>
+        <enum>QFrame::Panel</enum>
        </property>
        <property name="autoScrollMargin">
         <number>10</number>
        </property>
        <property name="editTriggers">
-        <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+        <set>QAbstractItemView::NoEditTriggers</set>
        </property>
        <property name="showDropIndicator" stdset="0">
         <bool>false</bool>
@@ -118,22 +118,25 @@ QTableWidget::item:pressed {
         <bool>false</bool>
        </property>
        <property name="selectionMode">
-        <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+        <enum>QAbstractItemView::NoSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectItems</enum>
        </property>
        <property name="textElideMode">
-        <enum>Qt::TextElideMode::ElideMiddle</enum>
+        <enum>Qt::ElideLeft</enum>
        </property>
        <property name="verticalScrollMode">
-        <enum>QAbstractItemView::ScrollMode::ScrollPerItem</enum>
+        <enum>QAbstractItemView::ScrollPerItem</enum>
        </property>
        <property name="horizontalScrollMode">
-        <enum>QAbstractItemView::ScrollMode::ScrollPerPixel</enum>
+        <enum>QAbstractItemView::ScrollPerItem</enum>
        </property>
        <property name="showGrid">
         <bool>true</bool>
        </property>
        <property name="gridStyle">
-        <enum>Qt::PenStyle::NoPen</enum>
+        <enum>Qt::NoPen</enum>
        </property>
        <attribute name="horizontalHeaderVisible">
         <bool>true</bool>
@@ -157,7 +160,7 @@ QTableWidget::item:pressed {
         <bool>true</bool>
        </attribute>
        <attribute name="verticalHeaderVisible">
-        <bool>true</bool>
+        <bool>false</bool>
        </attribute>
        <attribute name="verticalHeaderMinimumSectionSize">
         <number>20</number>
@@ -288,6 +291,12 @@ QTableWidget::item:pressed {
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::WheelFocus</enum>
+       </property>
+       <property name="autoFillBackground">
+        <bool>true</bool>
+       </property>
        <property name="styleSheet">
         <string notr="true">QTableWidget {
     background-color: #1e1d23;
@@ -334,16 +343,13 @@ QTableWidget::item:pressed {
 </string>
        </property>
        <property name="frameShape">
-        <enum>QFrame::Shape::Box</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Shadow::Raised</enum>
+        <enum>QFrame::NoFrame</enum>
        </property>
        <property name="autoScrollMargin">
         <number>10</number>
        </property>
        <property name="editTriggers">
-        <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+        <set>QAbstractItemView::NoEditTriggers</set>
        </property>
        <property name="showDropIndicator" stdset="0">
         <bool>false</bool>
@@ -355,19 +361,19 @@ QTableWidget::item:pressed {
         <bool>false</bool>
        </property>
        <property name="selectionMode">
-        <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+        <enum>QAbstractItemView::NoSelection</enum>
        </property>
        <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectionBehavior::SelectColumns</enum>
+        <enum>QAbstractItemView::SelectItems</enum>
        </property>
        <property name="textElideMode">
-        <enum>Qt::TextElideMode::ElideMiddle</enum>
+        <enum>Qt::ElideLeft</enum>
        </property>
        <property name="horizontalScrollMode">
-        <enum>QAbstractItemView::ScrollMode::ScrollPerPixel</enum>
+        <enum>QAbstractItemView::ScrollPerItem</enum>
        </property>
        <property name="gridStyle">
-        <enum>Qt::PenStyle::DashDotLine</enum>
+        <enum>Qt::NoPen</enum>
        </property>
        <property name="rowCount">
         <number>15</number>
@@ -388,7 +394,7 @@ QTableWidget::item:pressed {
         <bool>true</bool>
        </attribute>
        <attribute name="verticalHeaderVisible">
-        <bool>true</bool>
+        <bool>false</bool>
        </attribute>
        <attribute name="verticalHeaderCascadingSectionResizes">
         <bool>false</bool>

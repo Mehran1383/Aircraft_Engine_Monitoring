@@ -81,11 +81,11 @@ void Process_message::processData()
         return;
     }
     else{
-        sum += rawData[index];
+        sum += uint8_t(rawData[index]);
         MSG_counter = uint8_t(rawData[index++]);
     }
 
-    sum += rawData[index];
+    sum += uint8_t(rawData[index]);
     ID_Number = uint8_t(rawData[index++]);
 
     if(rawData[18 + (ID_Number - 1) * 10] != char(FOOTER_VALUE)){
@@ -98,13 +98,13 @@ void Process_message::processData()
 
         if(rawData[index] == char(OIL_PRESSURE)){
             qDebug() << "OIL_PRESSURE";
-            sum += uint8_t(rawData[index] & 0x00FF);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -115,13 +115,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(OIL_TEMPERATURE)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -132,13 +132,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(FUEL_FLOW)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -149,13 +149,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(FUEL)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -166,13 +166,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(EGT)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -183,13 +183,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(TORQUE)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -200,13 +200,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(INDICATED_POWER)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -217,13 +217,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(FRICTIONAL_POWER)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -234,13 +234,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(THERMAL_EFFICIENCY)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -251,13 +251,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(AIR_FUEL_RATIO)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 float real_data = static_cast<float>(data) / factor;
@@ -268,13 +268,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(MOTOR_SPEED)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -285,13 +285,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(OUTPUT_AIR_SPEED)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -302,13 +302,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(VIBRATION)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -319,13 +319,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(BODY_TEMP)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -336,13 +336,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(AIR_TEMP)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -353,13 +353,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(OIL_PRESSURE_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -370,13 +370,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(OIL_TEMPERATURE_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -387,13 +387,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(FUEL_FLOW_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -404,13 +404,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(FUEL_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -421,13 +421,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(EGT_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -438,13 +438,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(TORQUE_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -455,13 +455,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(INDICATED_POWER_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -472,13 +472,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(FRICTIONAL_POWER_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -489,13 +489,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(THERMAL_EFFICIENCY_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -506,13 +506,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(AIR_FUEL_RATIO_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -523,13 +523,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(MOTOR_SPEED_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -540,13 +540,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(OUTPUT_AIR_SPEED_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -557,13 +557,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(VIBRATION_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -574,13 +574,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(BODY_TEMP_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -591,13 +591,13 @@ void Process_message::processData()
         }
 
         else if(rawData[index] == char(AIR_TEMP_SENSOR_ERROR)){
-            sum += uint16_t(rawData[index]);
+            sum += uint8_t(rawData[index]);
             index += 2;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &data);
-            sum += data;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             packData32(rawData[index], rawData[index + 1], rawData[index + 2], rawData[index + 3], &factor);
-            sum += factor;
+            sum += (uint8_t(rawData[index])) + (uint8_t(rawData[index + 1])) + (uint8_t(rawData[index + 2])) + (uint8_t(rawData[index + 3]));
             index += 4;
             if(factor != 0){
                 real_data = static_cast<float>(data) / factor;
@@ -622,7 +622,7 @@ void Process_message::processData()
         emit updatePlot();
     }
     else {
-        qDebug() << "checksum";
+        qDebug() << "checksum should be" << checksum << "but is " << sum;
     }
 
     m_mtx.unlock();
@@ -630,13 +630,13 @@ void Process_message::processData()
 
 void Process_message::packData32(char byte1, char byte2, char byte3, char byte4, uint32_t *data)
 {
-    uint32_t packedData = uint32_t((byte1 & 0x00FF) + ((byte2 & 0x00FF) << 8) + ((byte3 & 0x00FF) << 16) + ((byte4 & 0x00FF) << 24));
+    uint32_t packedData = uint32_t(byte1 + (byte2 << 8) + (byte3 << 16) + (byte4 << 24));
     *data = packedData;
 }
 
 void Process_message::packData16(char byte1, char byte2, uint16_t *data)
 {
-    uint16_t packedData = (byte1 & 0x00FF) + ((byte2 & 0x00FF) << 8);
+    uint16_t packedData = uint16_t(byte1 + (byte2 << 8));
     *data = packedData;
 }
 

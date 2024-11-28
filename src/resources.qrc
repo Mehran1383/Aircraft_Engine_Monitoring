@@ -3,4 +3,7 @@
         <file>img/Aircraft control panel wallpaper.jpg</file>
         <file>img/flight-icon.jfif</file>
     </qresource>
+    <qresource prefix="/qss">
+        <file>style.qss</file>
+    </qresource>
 </RCC>

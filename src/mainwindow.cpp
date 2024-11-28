@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Create GroupBoxes and set titles
     OIL_PRESSURE_box.setTitle("OIL PRESSURE");
+    //OIL_PRESSURE_box.setStyleSheet()
     OIL_TEMPERATURE_box.setTitle("OIL TEMPERATURE");
     FUEL_box.setTitle("FUEL");
     TORQUE_box.setTitle("TORQUE");
@@ -99,6 +100,8 @@ MainWindow::MainWindow(QWidget *parent)
     plot.axisRect()->setupFullAxesBox();
     plot_layout.addWidget(&plot);
     plot_widget.setLayout(&plot_layout);
+    plot.setContextMenuPolicy(Qt::CustomContextMenu);
+    //plot_widget.setCursor(Qt::OpenHandCursor);
     ui->widget->addPage("Plot Panel", &plot_widget);
 
     // Tray Icon Setup
@@ -116,20 +119,12 @@ MainWindow::MainWindow(QWidget *parent)
     messageHandler->moveToThread(process_thread);
     process_thread->start();
 
-    // Serial port setup and create thread for it
+    // Serial port setup
     m_port = new QSerialPort(this);
-    serial_thread = new QThread;
-    m_port->moveToThread(serial_thread);
-    serial_thread->start();
 
-    // ScanTimer setup and create thread for it
+    // ScanTimer setup
     m_ScanTimer = new QTimer(this);
-    timer_thread = new QThread;
-    m_ScanTimer->moveToThread(timer_thread);
-    timer_thread->start();
     m_ScanTimer->setInterval(20);
-
-    plot.setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(m_ScanTimer, &QTimer::timeout,
             this, &MainWindow::wait_for_data);
@@ -147,7 +142,7 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::updatePlotPanel);
 
     connect(&plot, SIGNAL(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*,QMouseEvent*)),
-            this, SLOT(legendDoubleClick(QCPAbstractLegendItem*)));
+            this, SLOT(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*)));
 
     connect(&plot, SIGNAL(customContextMenuRequested(QPoint)),
              this, SLOT(contextMenuRequest(QPoint)));
@@ -168,12 +163,6 @@ MainWindow::~MainWindow()
 
     process_thread->quit();
     process_thread->wait();
-
-    timer_thread->quit();
-    timer_thread->wait();
-
-    serial_thread->quit();
-    serial_thread->wait();
 
     delete messageHandler;
     delete m_port;
@@ -264,6 +253,16 @@ void MainWindow::updatePlotPanel()
     plot.graph(2)->addData(key, double(map[char(FUEL)]));
     plot.graph(3)->addData(key, double(map[char(TORQUE)]));
     plot.graph(4)->addData(key, double(map[char(MOTOR_SPEED)]));
+
+    // make key axis range scroll with the data:
+    plot.xAxis->rescale();
+    plot.graph(0)->rescaleValueAxis(true, true);
+    plot.graph(1)->rescaleValueAxis(true, true);
+    plot.graph(2)->rescaleValueAxis(true, true);
+    plot.graph(3)->rescaleValueAxis(true, true);
+    plot.graph(4)->rescaleValueAxis(true, true);
+    plot.xAxis->setRange(plot.xAxis->range().upper, 1, Qt::AlignRight);
+    plot.replot();
 }
 
 void MainWindow::createGauge(QcGaugeWidget* m_gauge, QcNeedleItem* m_needle, QString title, int range, QList<QPair<QColor,float>> colorList)
@@ -303,19 +302,28 @@ void MainWindow::createPlot(QCustomPlot* plot)
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::blue));
     plot->graph(0)->setName("OIL PRESSURE");
+    plot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
     plot->graph(0)->setVisible(1);
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::red));
     plot->graph(1)->setName("OIL TEMPERATURE");
+    plot->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
+    plot->graph(1)->setVisible(0);
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::green));
     plot->graph(2)->setName("FUEL");
+    plot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
+    plot->graph(2)->setVisible(0);
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::yellow));
     plot->graph(3)->setName("TORQUE");
+    plot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
+    plot->graph(3)->setVisible(0);
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::darkCyan));
     plot->graph(4)->setName("MOTOR SPEED");
+    plot->graph(4)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
+    plot->graph(4)->setVisible(0);
     plot->axisRect()->setupFullAxesBox(true);
     plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                           QCP::iSelectLegend | QCP::iSelectPlottables);
@@ -323,8 +331,54 @@ void MainWindow::createPlot(QCustomPlot* plot)
     plot->legend->setBrush(QColor(255, 255, 255, 150));
     plot->yAxis->setRange(0, 1000);
     plot->xAxis->setLabel("time");
+    plot->xAxis->setLabelColor(Qt::white);
     plot->yAxis->setLabel("sensor value");
+    plot->yAxis->setLabelColor(Qt::white);
     plot->legend->setSelectableParts(QCPLegend::spItems);
+
+    // move bars above graphs and grid below bars:
+    plot->addLayer("abovemain", plot->layer("main"), QCustomPlot::limAbove);
+    plot->addLayer("belowmain", plot->layer("main"), QCustomPlot::limBelow);
+    plot->graph(0)->setLayer("abovemain");
+    plot->graph(1)->setLayer("abovemain");
+    plot->graph(2)->setLayer("abovemain");
+    plot->graph(3)->setLayer("abovemain");
+    plot->graph(4)->setLayer("abovemain");
+    plot->xAxis->grid()->setLayer("belowmain");
+    plot->yAxis->grid()->setLayer("belowmain");
+
+    // set some pens, brushes and backgrounds:
+    plot->xAxis->setBasePen(QPen(Qt::white, 1));
+    plot->yAxis->setBasePen(QPen(Qt::white, 1));
+    plot->xAxis->setTickPen(QPen(Qt::white, 1));
+    plot->yAxis->setTickPen(QPen(Qt::white, 1));
+    plot->xAxis->setSubTickPen(QPen(Qt::white, 1));
+    plot->yAxis->setSubTickPen(QPen(Qt::white, 1));
+    plot->xAxis->setTickLabelColor(Qt::white);
+    plot->yAxis->setTickLabelColor(Qt::white);
+    plot->xAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
+    plot->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
+    plot->xAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
+    plot->yAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
+    plot->xAxis->grid()->setSubGridVisible(true);
+    plot->yAxis->grid()->setSubGridVisible(true);
+    plot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
+    plot->yAxis->grid()->setZeroLinePen(Qt::NoPen);
+    plot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+    plot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+    QLinearGradient plotGradient;
+    plotGradient.setStart(0, 0);
+    plotGradient.setFinalStop(0, 350);
+    plotGradient.setColorAt(0, QColor(80, 80, 80));
+    plotGradient.setColorAt(1, QColor(50, 50, 50));
+    plot->setBackground(plotGradient);
+    QLinearGradient axisRectGradient;
+    axisRectGradient.setStart(0, 0);
+    axisRectGradient.setFinalStop(0, 350);
+    axisRectGradient.setColorAt(0, QColor(80, 80, 80));
+    axisRectGradient.setColorAt(1, QColor(30, 30, 30));
+    plot->axisRect()->setBackground(axisRectGradient);
+
 }
 
 void MainWindow::on_setting_clicked()
@@ -375,13 +429,23 @@ void MainWindow::createTrayIcon()
     m_trayIcon->setVisible(true);
 }
 
-void MainWindow::legendDoubleClick(QCPAbstractLegendItem *item)
+void MainWindow::legendDoubleClick(QCPLegend* legend, QCPAbstractLegendItem *selectedItem)
 {
-    if(item->visible()){
-        item->setVisible(0);
-    }
-    else{
-        item->setVisible(1);
+    Q_UNUSED(legend)
+
+    if(selectedItem){
+        for (int i=0; i< plot.graphCount(); ++i)
+        {
+          QCPGraph *graph = plot.graph(i);
+          QCPPlottableLegendItem *item = plot.legend->itemWithPlottable(graph);
+          if(selectedItem == item){
+            plot.graph(i)->setVisible(1);
+          }
+          else{
+            plot.graph(i)->setVisible(0);
+          }
+        }
+        plot.replot();
     }
 }
 
@@ -416,3 +480,25 @@ void MainWindow::moveLegend()
   }
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    int currentTab = ui->widget->getCurrentTab();
+    if(event->key() == Qt::Key_Left){
+        if(currentTab > 0){
+            ui->widget->setCurrentTab(currentTab - 1);
+        }
+        else{
+            ui->widget->setCurrentTab(2);
+        }
+        return;
+    }
+
+    if(event->key() == Qt::Key_Right){
+        if(currentTab < 2){
+            ui->widget->setCurrentTab(currentTab + 1);
+        }
+        else{
+            ui->widget->setCurrentTab(0);
+        }
+    }
+}

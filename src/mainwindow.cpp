@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     main_widget.setLayout(&main_layout);
 
-    ui->widget->addPage("Table panel",&sensor_error);
+    ui->widget->addPage("Table Panel",&sensor_error);
 
     // Add main widget to widget container
     ui->widget->addPage("Gauge Panel", &main_widget);
@@ -141,6 +141,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(messageHandler, &Process_message::updatePlot,
             this, &MainWindow::updatePlotPanel);
 
+    connect(messageHandler, &Process_message::updateTable,
+            this, &MainWindow::updateTablePanel);
+
+    connect(this, &MainWindow::saveSignal,
+            this, &MainWindow::saveToFile);
+
     connect(&plot, SIGNAL(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*,QMouseEvent*)),
             this, SLOT(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*)));
 
@@ -169,7 +175,21 @@ MainWindow::~MainWindow()
     delete m_ScanTimer;
     delete m_trayIcon;
     delete m_trayIconMenu;
-
+    delete process_thread;
+    delete m_OilPressureGauge;
+    delete m_OilPressureNeedle;
+    delete m_OilTemperatureGauge;
+    delete m_OilTemperatureNeedle;
+    delete m_FuelGauge;
+    delete m_FuelNeedle;
+    delete m_TorqueNeedle;
+    delete m_TorqueGauge;
+    delete m_MotorSpeedNeedle;
+    delete m_MotorSpeedGauge;
+    delete m_minimizeAction;
+    delete m_maximizeAction;
+    delete m_restoreAction;
+    delete m_quitAction;
     delete ui;
     delete m_settings;
 }
@@ -196,12 +216,13 @@ void MainWindow::on_connectButton_clicked()
         if(setting.notification){
             showMessage("Disconnected", m_port->portName() + " closed");
         }
-
+        ui->connectButton->setText("Connect");
         m_OilPressureNeedle->setCurrentValue(0);
         m_OilTemperatureNeedle->setCurrentValue(0);
         m_FuelNeedle->setCurrentValue(0);
         m_TorqueNeedle->setCurrentValue(0);
         m_MotorSpeedNeedle->setCurrentValue(0);
+        emit saveSignal();
         return;
     }
 
@@ -215,6 +236,7 @@ void MainWindow::on_connectButton_clicked()
     if(m_port->open(QIODevice::ReadOnly)) {
         qDebug() << "SERIAL: OK!";
         connection_status = 1;
+        ui->connectButton->setText("Disconnect");
         m_ScanTimer->start();
         if(setting.notification){
             showMessage("Connected Successfully", m_port->portName());
@@ -224,7 +246,6 @@ void MainWindow::on_connectButton_clicked()
     }
 
 }
-
 
 void MainWindow::wait_for_data()
 {
@@ -263,6 +284,12 @@ void MainWindow::updatePlotPanel()
     plot.graph(4)->rescaleValueAxis(true, true);
     plot.xAxis->setRange(plot.xAxis->range().upper, 1, Qt::AlignRight);
     plot.replot();
+}
+
+void MainWindow::updateTablePanel()
+{
+    QMap<char,float> map = messageHandler->getFlags();
+
 }
 
 void MainWindow::createGauge(QcGaugeWidget* m_gauge, QcNeedleItem* m_needle, QString title, int range, QList<QPair<QColor,float>> colorList)
@@ -501,4 +528,21 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             ui->widget->setCurrentTab(0);
         }
     }
+}
+
+void MainWindow::saveToFile()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Save As"), "",
+        tr("Excel (*.xlsx)"));
+
+    if (fileName.isEmpty())
+        return;
+
+    if (QFile::exists(fileName))
+    {
+       QFile::remove(fileName);
+    }
+
+    QFile::copy(QDir::currentPath() + "", fileName);
 }

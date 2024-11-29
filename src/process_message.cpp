@@ -620,6 +620,7 @@ void Process_message::processData()
         }
         emit updateGauge();
         emit updatePlot();
+        emit updateTable();
     }
     else {
         qDebug() << "checksum should be" << checksum << "but is " << sum;

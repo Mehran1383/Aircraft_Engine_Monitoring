@@ -66,6 +66,7 @@ private:
 signals:
     void updateGauge();
     void updatePlot();
+    void updateTable();
 };
 
 

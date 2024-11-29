@@ -27,7 +27,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
     void createGauge(QcGaugeWidget*, QcNeedleItem*, QString, int, QList<QPair<QColor,float>>);
     void showMessage(QString title, QString body);
@@ -45,12 +45,15 @@ public slots:
     void moveLegend();
     void updateGaugePanel();
     void updatePlotPanel();
+    void updateTablePanel();
+    void saveToFile();
 
 protected:
      void keyPressEvent(QKeyEvent *event) override;
 
 signals:
     void startProcess();
+    void saveSignal();
 
 private:
     Ui::MainWindow *ui;
@@ -92,7 +95,6 @@ private:
     QWidget plot_widget;
     QCustomPlot plot;
     SensorErrorTable sensor_error;
-
 
     bool connection_status;
 };

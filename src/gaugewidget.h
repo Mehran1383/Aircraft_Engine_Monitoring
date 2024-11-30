@@ -200,10 +200,10 @@ public:
     void setColors(const QList<QPair<QColor,float> >& colors);
 
 private:
-   QPainterPath createSubBand(float from,float sweep);
+    QPainterPath createSubBand(float from,float sweep);
 
-   QList<QPair<QColor,float> > mBandColors;
-   float mBandStartValue;
+    QList<QPair<QColor,float> > mBandColors;
+    float mBandStartValue;
 };
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////

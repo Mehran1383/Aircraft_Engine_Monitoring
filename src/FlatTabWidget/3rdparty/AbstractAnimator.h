@@ -32,7 +32,7 @@ namespace WAF
 		Q_OBJECT
 
 	public:
-		explicit AbstractAnimator(QObject* _parent = 0) : QObject(_parent) {}
+        explicit AbstractAnimator(QObject* _parent = nullptr) : QObject(_parent) {}
 
 		/**
 		 * @brief Длительность анимации

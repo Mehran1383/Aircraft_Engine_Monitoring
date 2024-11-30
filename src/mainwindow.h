@@ -10,6 +10,7 @@
 #include <QGroupBox>
 #include <QDateTime>
 #include <QKeyEvent>
+#include <QTextStream>
 
 #include "process_message.h"
 #include "gaugewidget.h"
@@ -49,7 +50,7 @@ public slots:
     void saveToFile();
 
 protected:
-     void keyPressEvent(QKeyEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 signals:
     void startProcess();
@@ -94,7 +95,8 @@ private:
     QWidget main_widget;
     QWidget plot_widget;
     QCustomPlot plot;
-    SensorErrorTable sensor_error;
+    SensorErrorTable sensorTables;
+    QFile* file;
 
     bool connection_status;
 };

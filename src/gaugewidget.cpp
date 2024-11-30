@@ -92,7 +92,7 @@ void QcGaugeWidget::addItem(QcItem *item,float position)
 
 int QcGaugeWidget::removeItem(QcItem *item)
 {
-   return mItems.removeAll(item);
+    return mItems.removeAll(item);
 }
 
 QList<QcItem *> QcGaugeWidget::items()
@@ -307,11 +307,11 @@ void QcBackgroundItem::addColor(float position, const QColor &color)
 {
     if(position<0||position>1)
         return;
-      QPair<float,QColor> pair;
-      pair.first = position;
-      pair.second = color;
-      mColors.append(pair);
-      update();
+    QPair<float,QColor> pair;
+    pair.first = position;
+    pair.second = color;
+    mColors.append(pair);
+    update();
 }
 
 void QcBackgroundItem::clearrColors()
@@ -615,7 +615,7 @@ void QcNeedleItem::draw(QPainter *painter)
 
 void QcNeedleItem::setCurrentValue(float value)
 {
-       if(value<mMinValue)
+    if(value<mMinValue)
         mCurrentValue = mMinValue;
     else if(value>mMaxValue)
         mCurrentValue = mMaxValue;
@@ -625,13 +625,13 @@ void QcNeedleItem::setCurrentValue(float value)
     if(mLabel!=0)
         mLabel->setText(QString::number(mCurrentValue),false);
 
-/// This pull request is not working properly
-//    if(mLabel!=0){
-//        QString currentValue;
-//        mLabel->setText( currentValue ,false);
-//        mLabel->setText(currentValue.sprintf(mFormat.toStdString().c_str(), mCurrentValue),false);
-//        Q_UNUSED(currentValue);
-//    }
+    /// This pull request is not working properly
+    //    if(mLabel!=0){
+    //        QString currentValue;
+    //        mLabel->setText( currentValue ,false);
+    //        mLabel->setText(currentValue.sprintf(mFormat.toStdString().c_str(), mCurrentValue),false);
+    //        Q_UNUSED(currentValue);
+    //    }
     update();
 }
 

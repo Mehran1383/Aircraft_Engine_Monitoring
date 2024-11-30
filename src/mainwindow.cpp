@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     main_widget.setLayout(&main_layout);
 
-    ui->widget->addPage("Table Panel",&sensor_error);
+    ui->widget->addPage("Table Panel",&sensorTables);
 
     // Add main widget to widget container
     ui->widget->addPage("Gauge Panel", &main_widget);
@@ -111,7 +111,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_trayIcon->setIcon(QIcon(":/img/img/flight-icon.jfif"));
 
     // Initialize connection status and message handler
-    connection_status = 0;
+    connection_status = false;
     messageHandler = new Process_message;
 
     // Create thread for message handler
@@ -125,6 +125,9 @@ MainWindow::MainWindow(QWidget *parent)
     // ScanTimer setup
     m_ScanTimer = new QTimer(this);
     m_ScanTimer->setInterval(20);
+
+    // temp file for save data
+    file = new QFile("savedData");
 
     connect(m_ScanTimer, &QTimer::timeout,
             this, &MainWindow::wait_for_data);
@@ -151,7 +154,7 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*)));
 
     connect(&plot, SIGNAL(customContextMenuRequested(QPoint)),
-             this, SLOT(contextMenuRequest(QPoint)));
+            this, SLOT(contextMenuRequest(QPoint)));
 
     connect(plot.xAxis, SIGNAL(rangeChanged(QCPRange)),
             plot.xAxis2, SLOT(setRange(QCPRange)));
@@ -211,7 +214,8 @@ void MainWindow::on_connectButton_clicked()
     if (connection_status) {
         qDebug() << "disconnecting!";
         m_port->close();
-        connection_status = 0;
+        file->close();
+        connection_status = false;
         m_ScanTimer->stop();
         if(setting.notification){
             showMessage("Disconnected", m_port->portName() + " closed");
@@ -235,7 +239,8 @@ void MainWindow::on_connectButton_clicked()
 
     if(m_port->open(QIODevice::ReadOnly)) {
         qDebug() << "SERIAL: OK!";
-        connection_status = 1;
+        file->open(QIODevice::WriteOnly | QIODevice::Text);
+        connection_status = true;
         ui->connectButton->setText("Disconnect");
         m_ScanTimer->start();
         if(setting.notification){
@@ -257,11 +262,11 @@ void MainWindow::wait_for_data()
 void MainWindow::updateGaugePanel()
 {
     QMap<char,float> map = messageHandler->getFlags();
-    m_OilPressureNeedle->setCurrentValue(map[char(OIL_PRESSURE)]);
-    m_OilTemperatureNeedle->setCurrentValue(map[char(OIL_TEMPERATURE)]);
-    m_FuelNeedle->setCurrentValue(map[char(FUEL)]);
-    m_TorqueNeedle->setCurrentValue(map[char(TORQUE)]);
-    m_MotorSpeedNeedle->setCurrentValue(map[char(MOTOR_SPEED)]);
+    m_OilPressureNeedle->setCurrentValue(map[char(OIL_PRESSURE)] / 10);
+    m_OilTemperatureNeedle->setCurrentValue(map[char(OIL_TEMPERATURE)] / 10);
+    m_FuelNeedle->setCurrentValue(map[char(FUEL)] / 10);
+    m_TorqueNeedle->setCurrentValue(map[char(TORQUE)] / 10);
+    m_MotorSpeedNeedle->setCurrentValue(map[char(MOTOR_SPEED)] / 10);
 }
 
 void MainWindow::updatePlotPanel()
@@ -289,7 +294,45 @@ void MainWindow::updatePlotPanel()
 void MainWindow::updateTablePanel()
 {
     QMap<char,float> map = messageHandler->getFlags();
+    QTextStream out(file);
 
+    // Update Table
+    sensorTables.setValue(map);
+
+    // Write data to the file
+    out << "Data,Value\n";
+
+    out << "OIL PRESSURE" << "," << map[char(OIL_PRESSURE)] << "\n";
+    out << "OIL TEMPERATURE" << "," << map[char(OIL_TEMPERATURE)] << "\n";
+    out << "FUEL FLOW" << "," << map[char(FUEL_FLOW)] << "\n";
+    out << "FUEL" << "," << map[char(FUEL)] << "\n";
+    out << "EGT" << "," << map[char(EGT)] << "\n";
+    out << "TORQUE" << "," << map[char(TORQUE)] << "\n";
+    out << "INDICATED POWER" << "," << map[char(INDICATED_POWER)] << "\n";
+    out << "FRICTIONAL POWER" << "," << map[char(FRICTIONAL_POWER)] << "\n";
+    out << "THERMAL EFFICIENCY" << "," << map[char(THERMAL_EFFICIENCY)] << "\n";
+    out << "AIR FUEL RATIO" << "," << map[char(AIR_FUEL_RATIO)] << "\n";
+    out << "MOTOR SPEED" << "," << map[char(MOTOR_SPEED)] << "\n";
+    out << "OUTPUT AIR SPEED" << "," << map[char(OUTPUT_AIR_SPEED)] << "\n";
+    out << "VIBRATION" << "," << map[char(VIBRATION)] << "\n";
+    out << "BODY TEMP" << "," << map[char(BODY_TEMP)] << "\n";
+    out << "AIR TEMP" << "," << map[char(AIR_TEMP)] << "\n";
+
+    out << "OIL PRESSURE SENSOR ERROR" << "," << map[char(OIL_PRESSURE_SENSOR_ERROR)] << "\n";
+    out << "OIL TEMPERATURE SENSOR ERROR" << "," << map[char(OIL_TEMPERATURE_SENSOR_ERROR)] << "\n";
+    out << "FUEL FLOW SENSOR ERROR" << "," << map[char(FUEL_FLOW_SENSOR_ERROR)] << "\n";
+    out << "FUEL SENSOR ERROR" << "," << map[char(FUEL_SENSOR_ERROR)] << "\n";
+    out << "EGT SENSOR ERROR" << "," << map[char(EGT_SENSOR_ERROR)] << "\n";
+    out << "TORQUE SENSOR ERROR" << "," << map[char(TORQUE_SENSOR_ERROR)] << "\n";
+    out << "INDICATED POWER SENSOR ERROR" << "," << map[char(INDICATED_POWER_SENSOR_ERROR)] << "\n";
+    out << "FRICTIONAL POWER SENSOR ERROR" << "," << map[char(FRICTIONAL_POWER_SENSOR_ERROR)] << "\n";
+    out << "THERMAL EFFICIENCY SENSOR ERROR" << "," << map[char(THERMAL_EFFICIENCY_SENSOR_ERROR)] << "\n";
+    out << "AIR FUEL RATIO SENSOR ERROR" << "," << map[char(AIR_FUEL_RATIO_SENSOR_ERROR)] << "\n";
+    out << "MOTOR SPEED SENSOR ERROR" << "," << map[char(MOTOR_SPEED_SENSOR_ERROR)] << "\n";
+    out << "OUTPUT AIR SPEED SENSOR ERROR" << "," << map[char(OUTPUT_AIR_SPEED_SENSOR_ERROR)] << "\n";
+    out << "VIBRATION SENSOR ERROR" << "," << map[char(VIBRATION_SENSOR_ERROR)] << "\n";
+    out << "BODY TEMP SENSOR ERROR" << "," << map[char(BODY_TEMP_SENSOR_ERROR)] << "\n";
+    out << "AIR TEMP SENSOR ERROR" << "," << map[char(AIR_TEMP_SENSOR_ERROR)] << "\n";
 }
 
 void MainWindow::createGauge(QcGaugeWidget* m_gauge, QcNeedleItem* m_needle, QString title, int range, QList<QPair<QColor,float>> colorList)
@@ -297,13 +340,13 @@ void MainWindow::createGauge(QcGaugeWidget* m_gauge, QcNeedleItem* m_needle, QSt
     m_gauge->addBackground(99);
     QcBackgroundItem *bkg1 = m_gauge->addBackground(92);
     bkg1->clearrColors();
-    bkg1->addColor(0.1f,Qt::black);
-    bkg1->addColor(1.0f,Qt::white);
+    bkg1->addColor(0.1F,Qt::black);
+    bkg1->addColor(1.0F,Qt::white);
 
     QcBackgroundItem *bkg2 = m_gauge->addBackground(88);
     bkg2->clearrColors();
-    bkg2->addColor(0.1f,Qt::gray);
-    bkg2->addColor(1.0f,Qt::darkGray);
+    bkg2->addColor(0.1F,Qt::gray);
+    bkg2->addColor(1.0F,Qt::darkGray);
 
     m_gauge->addArc(55);
     m_gauge->addDegrees(65)->setValueRange(0,range);
@@ -330,31 +373,31 @@ void MainWindow::createPlot(QCustomPlot* plot)
     plot->graph()->setPen(QPen(Qt::blue));
     plot->graph(0)->setName("OIL PRESSURE");
     plot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
-    plot->graph(0)->setVisible(1);
+    plot->graph(0)->setVisible(true);
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::red));
     plot->graph(1)->setName("OIL TEMPERATURE");
     plot->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
-    plot->graph(1)->setVisible(0);
+    plot->graph(1)->setVisible(false);
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::green));
     plot->graph(2)->setName("FUEL");
     plot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
-    plot->graph(2)->setVisible(0);
+    plot->graph(2)->setVisible(false);
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::yellow));
     plot->graph(3)->setName("TORQUE");
     plot->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
-    plot->graph(3)->setVisible(0);
+    plot->graph(3)->setVisible(false);
     plot->addGraph();
     plot->graph()->setPen(QPen(Qt::darkCyan));
     plot->graph(4)->setName("MOTOR SPEED");
     plot->graph(4)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
-    plot->graph(4)->setVisible(0);
+    plot->graph(4)->setVisible(false);
     plot->axisRect()->setupFullAxesBox(true);
     plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                           QCP::iSelectLegend | QCP::iSelectPlottables);
-    plot->legend->setVisible(1);
+    plot->legend->setVisible(true);
     plot->legend->setBrush(QColor(255, 255, 255, 150));
     plot->yAxis->setRange(0, 1000);
     plot->xAxis->setLabel("time");
@@ -463,14 +506,14 @@ void MainWindow::legendDoubleClick(QCPLegend* legend, QCPAbstractLegendItem *sel
     if(selectedItem){
         for (int i=0; i< plot.graphCount(); ++i)
         {
-          QCPGraph *graph = plot.graph(i);
-          QCPPlottableLegendItem *item = plot.legend->itemWithPlottable(graph);
-          if(selectedItem == item){
-            plot.graph(i)->setVisible(1);
-          }
-          else{
-            plot.graph(i)->setVisible(0);
-          }
+            QCPGraph *graph = plot.graph(i);
+            QCPPlottableLegendItem *item = plot.legend->itemWithPlottable(graph);
+            if(selectedItem == item){
+                plot.graph(i)->setVisible(true);
+            }
+            else{
+                plot.graph(i)->setVisible(false);
+            }
         }
         plot.replot();
     }
@@ -478,33 +521,33 @@ void MainWindow::legendDoubleClick(QCPLegend* legend, QCPAbstractLegendItem *sel
 
 void MainWindow::contextMenuRequest(QPoint pos)
 {
-  QMenu *menu = new QMenu(this);
-  menu->setAttribute(Qt::WA_DeleteOnClose);
+    QMenu *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
 
-  if (plot.legend->selectTest(pos, false) >= 0)
-  {
-    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
-    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
-    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
-    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
-    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
-  }
+    if (plot.legend->selectTest(pos, false) >= 0)
+    {
+        menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
+        menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
+        menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
+        menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
+        menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
+    }
 
-  menu->popup(plot.mapToGlobal(pos));
+    menu->popup(plot.mapToGlobal(pos));
 }
 
 void MainWindow::moveLegend()
 {
-  if (QAction* contextAction = qobject_cast<QAction*>(sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
-  {
-    bool ok;
-    int dataInt = contextAction->data().toInt(&ok);
-    if (ok)
+    if (QAction* contextAction = qobject_cast<QAction*>(sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
     {
-      plot.axisRect()->insetLayout()->setInsetAlignment(0, (Qt::Alignment)dataInt);
-      plot.replot();
+        bool ok;
+        int dataInt = contextAction->data().toInt(&ok);
+        if (ok)
+        {
+            plot.axisRect()->insetLayout()->setInsetAlignment(0, (Qt::Alignment)dataInt);
+            plot.replot();
+        }
     }
-  }
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -533,16 +576,20 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 void MainWindow::saveToFile()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save As"), "",
-        tr("Excel (*.xlsx)"));
+                                                    tr("Save As"), "",
+                                                    tr("CSV (*.csv)"));
 
     if (fileName.isEmpty())
         return;
 
     if (QFile::exists(fileName))
     {
-       QFile::remove(fileName);
+        QFile::remove(fileName);
     }
 
-    QFile::copy(QDir::currentPath() + "", fileName);
+    QFile::copy(QDir::currentPath() + "/savedData", fileName);
+    QMessageBox::information(this, "Success", "File saved successfully!");
 }
+
+
+

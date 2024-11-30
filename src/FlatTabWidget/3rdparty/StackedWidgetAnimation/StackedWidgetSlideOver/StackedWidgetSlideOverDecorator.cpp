@@ -31,7 +31,7 @@ StackedWidgetSlideOverDecorator::StackedWidgetSlideOverDecorator(QWidget* _paren
 
 void StackedWidgetSlideOverDecorator::grabContainer()
 {
-	if (QStackedWidget* container = qobject_cast<QStackedWidget*>(parentWidget())) {
+    if (auto container = qobject_cast<QStackedWidget*>(parentWidget())) {
 		m_widgetForGrab = container->currentWidget();
 		grabWidget();
 	}

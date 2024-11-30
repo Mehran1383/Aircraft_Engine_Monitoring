@@ -61,7 +61,7 @@ namespace WAF
 		 * @brief Получить аниматор для заданного виджета
 		 */
 		AbstractAnimator* animator(QWidget* _widget, AnimatorType _animatorType) const {
-			AbstractAnimator* animator = 0;
+            AbstractAnimator* animator = nullptr;
 			if (m_animators.contains(_animatorType)) {
 				animator = m_animators.value(_animatorType).value(_widget, 0);
 			}

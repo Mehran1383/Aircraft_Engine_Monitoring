@@ -198,7 +198,7 @@ void StackedWidgetSlideOverAnimator::slideOverOut()
 	//
 	// Делаем виджет, над которым мы выкатывали текущий, активным
 	//
-	if (QStackedWidget* container = qobject_cast<QStackedWidget*>(stackedWidget())) {
+    if (auto container = qobject_cast<QStackedWidget*>(stackedWidget())) {
 		container->setCurrentWidget(m_coveredWidget);
 	}
 

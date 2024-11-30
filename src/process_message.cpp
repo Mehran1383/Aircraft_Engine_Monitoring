@@ -631,13 +631,19 @@ void Process_message::processData()
 
 void Process_message::packData32(char byte1, char byte2, char byte3, char byte4, uint32_t *data)
 {
-    uint32_t packedData = uint32_t(byte1 + (byte2 << 8) + (byte3 << 16) + (byte4 << 24));
+    uint32_t packedData = 0;
+    packedData += uint32_t(byte1);
+    packedData += ((uint32_t(byte2)) << 8);
+    packedData += ((uint32_t(byte3)) << 16);
+    packedData += ((uint32_t(byte4)) << 24);
     *data = packedData;
 }
 
 void Process_message::packData16(char byte1, char byte2, uint16_t *data)
 {
-    uint16_t packedData = uint16_t(byte1 + (byte2 << 8));
+    uint16_t packedData = 0;
+    packedData += uint16_t(byte1);
+    packedData += ((uint16_t(byte2)) << 8);
     *data = packedData;
 }
 

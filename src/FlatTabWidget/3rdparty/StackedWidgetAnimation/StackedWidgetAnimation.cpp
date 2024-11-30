@@ -34,14 +34,14 @@ using WAF::StackedWidgetFadeInAnimator;
 void StackedWidgetAnimation::slide(QStackedWidget* _container, QWidget* _widget, WAF::AnimationDirection _direction)
 {
     const StackedWidgetAnimationPrivate::AnimatorType animatorType = StackedWidgetAnimationPrivate::Slide;
-    AbstractAnimator* animator = 0;
+    AbstractAnimator* animator = nullptr;
     if (pimpl()->hasAnimator(_widget, animatorType)) {
         animator = pimpl()->animator(_widget, animatorType);
-        if (StackedWidgetSlideAnimator* slideAnimator = qobject_cast<StackedWidgetSlideAnimator*>(animator)) {
+        if (auto slideAnimator = qobject_cast<StackedWidgetSlideAnimator*>(animator)) {
             slideAnimator->setAnimationDirection(_direction);
         }
     } else {
-        StackedWidgetSlideAnimator* slideAnimator = new StackedWidgetSlideAnimator(_container, _widget);
+        auto slideAnimator = new StackedWidgetSlideAnimator(_container, _widget);
         slideAnimator->setAnimationDirection(_direction);
         animator = slideAnimator;
 
@@ -66,17 +66,17 @@ void StackedWidgetAnimation::slideOverOut(QStackedWidget* _container, QWidget* _
 void StackedWidgetAnimation::slideOver(QStackedWidget* _container, QWidget* _widget, WAF::AnimationDirection _direction, bool _in)
 {
     const StackedWidgetAnimationPrivate::AnimatorType animatorType = StackedWidgetAnimationPrivate::SlideOver;
-    AbstractAnimator* animator = 0;
+    AbstractAnimator* animator = nullptr;
     if (pimpl()->hasAnimator(_widget, animatorType)) {
         animator = pimpl()->animator(_widget, animatorType);
-        if (StackedWidgetSlideOverAnimator* slideOverAnimator = qobject_cast<StackedWidgetSlideOverAnimator*>(animator)) {
+        if (auto slideOverAnimator = qobject_cast<StackedWidgetSlideOverAnimator*>(animator)) {
             if (_in) {
                 slideOverAnimator->updateCoveredWidget();
             }
             slideOverAnimator->setAnimationDirection(_direction);
         }
     } else {
-        StackedWidgetSlideOverAnimator* slideOverAnimator = new StackedWidgetSlideOverAnimator(_container, _widget);
+        auto slideOverAnimator = new StackedWidgetSlideOverAnimator(_container, _widget);
         slideOverAnimator->setAnimationDirection(_direction);
         animator = slideOverAnimator;
 
@@ -93,11 +93,11 @@ void StackedWidgetAnimation::slideOver(QStackedWidget* _container, QWidget* _wid
 AbstractAnimator* StackedWidgetAnimation::fadeIn(QStackedWidget* _container, QWidget* _widget)
 {
     const StackedWidgetAnimationPrivate::AnimatorType animatorType = StackedWidgetAnimationPrivate::FadeIn;
-    AbstractAnimator* animator = 0;
+    AbstractAnimator* animator = nullptr;
     if (pimpl()->hasAnimator(_widget, animatorType)) {
         animator = pimpl()->animator(_widget, animatorType);
     } else {
-        StackedWidgetFadeInAnimator* fadeInAnimator = new StackedWidgetFadeInAnimator(_container, _widget);
+        auto fadeInAnimator = new StackedWidgetFadeInAnimator(_container, _widget);
         animator = fadeInAnimator;
         pimpl()->saveAnimator(_widget, animator, animatorType);
     }
@@ -107,11 +107,11 @@ AbstractAnimator* StackedWidgetAnimation::fadeIn(QStackedWidget* _container, QWi
     return animator;
 }
 
-StackedWidgetAnimationPrivate* StackedWidgetAnimation::m_pimpl = 0;
+StackedWidgetAnimationPrivate* StackedWidgetAnimation::m_pimpl = nullptr;
 
 StackedWidgetAnimationPrivate* StackedWidgetAnimation::pimpl()
 {
-    if (m_pimpl == 0) {
+    if (m_pimpl == nullptr) {
         m_pimpl = new StackedWidgetAnimationPrivate;
     }
 

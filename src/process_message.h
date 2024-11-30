@@ -2,7 +2,7 @@
 #define PROCESS_MESSAGE_H
 
 
-#include <stdint.h>
+#include <cstdint>
 #include <QString>
 #include <QMutex>
 #include <QWidget>

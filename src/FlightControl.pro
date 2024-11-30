@@ -1,9 +1,9 @@
 QT       += core gui
 QT       += serialport
 QT       += widgets
-QMAKE_CXXFLAGS += -Wa,-mbig-obj
+QT       += printsupport
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+greaterThan(QT_MAJOR_VERSION, 4):
 
 CONFIG += c++11
 
@@ -24,6 +24,7 @@ SOURCES += \
     mainwindow.cpp \
     process_message.cpp \
     qcustomplot.cpp \
+    sensorerrordelegate.cpp \
     sensorerrortable.cpp \
     settingsdialog.cpp
 
@@ -32,6 +33,7 @@ HEADERS += \
     mainwindow.h \
     process_message.h \
     qcustomplot.h \
+    sensorerrordelegate.h \
     sensorerrortable.h \
     settingsdialog.h
 

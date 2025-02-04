@@ -58,9 +58,8 @@ The following sensitive data will be displayed using circular gauges:
 - Fuel
 - Torque
 - Motor Speed
-- Oil Pressure (duplicate for emphasis)
 
-Warning lights will indicate errors in sensor readings, with red for error and green for no error.
+Warning lights will indicate errors in sensor readings.
 
 ## Display of All Data in Two Tables
 Sensor error data will be displayed in one table, and all other data will be displayed in another table. Each row in the table will include the data name and its value.

@@ -71,10 +71,23 @@ The settings page will include fields for serial port address, baud rate, parity
 When the user presses the "Start" button, a new file will be created, and all received data will be stored in Excel format. Each row of the Excel file will represent data received from one message. Pressing the "Stop" button will save and close the file.
 
 ## User Testing
-SENSORY program, sends engine sensor data over the serial port for desktop testing. Two virtual ports will be created, and each program will connect to one of the virtual serial ports. SENSORY will begin sending data for testing. This program is provided FlightControlTest folder.
+SENSORY program, sends engine sensor data over the serial port for desktop testing. Two virtual ports will be created, and each program will connect to one of the virtual serial ports. SENSORY will begin sending data for testing. This program is provided in FlightControlTest folder.
 
 ## Project Demo
 
 [![demo](https://github.com/user-attachments/assets/b97138d1-3332-45e3-b2c2-8ee71b3ad3dd)
 ](https://www.youtube.com/watch?v=Hr5jNGkqMNg)
 
+## Installation and Usage
+
+1. **Clone this repository**:
+
+   ```bash
+   git clone https://github.com/Mehran1383/Aircraft_Engine_Monitoring.git
+
+2. **Run programs**:
+
+   You can either run the program in Qt or using installer I have provided. Also you need to run Sensory.exe
+   
+3.  **Make virtual serial ports**:
+   There are lots of free software that can do this. For example I'm using [**Virtual Serial Port Tools**](https://freevirtualserialports.com/) to make a pair serial port connection.

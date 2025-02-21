@@ -90,4 +90,4 @@ Click To Watch Full Video on Youtube :
    You can either run the program in Qt or using installer I have provided. Also you need to run Sensory.exe
    
 3.  **Make virtual serial ports**:
-   There are lots of free software that can do this. For example I'm using [**Virtual Serial Port Tools**](https://freevirtualserialports.com/) to make a pair serial port connection.
+   There are lots of free software to carry this out. For example I use [**Virtual Serial Port Tools**](https://freevirtualserialports.com/) to make a pair of serial port connections.

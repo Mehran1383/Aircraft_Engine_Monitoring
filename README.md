@@ -74,8 +74,8 @@ When the user presses the "Start" button, a new file will be created, and all re
 SENSORY program, sends engine sensor data over the serial port for desktop testing. Two virtual ports will be created, and each program will connect to one of the virtual serial ports. SENSORY will begin sending data for testing. This program is provided in FlightControlTest folder.
 
 ## Project Demo
-
-[![demo](https://github.com/user-attachments/assets/b97138d1-3332-45e3-b2c2-8ee71b3ad3dd)
+Click To Watch Full Video on Youtube :
+[![](https://github.com/user-attachments/assets/b97138d1-3332-45e3-b2c2-8ee71b3ad3dd)
 ](https://www.youtube.com/watch?v=Hr5jNGkqMNg)
 
 ## Installation and Usage

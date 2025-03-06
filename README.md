@@ -11,6 +11,7 @@
 - [Data Storage in Excel Format](#data-storage-in-excel-format)
 - [User Testing](#user-testing)
 - [Project Demo](#project-demo)
+- [Installation and Usage](#installation-and-usage)
 
 ## Introduction
 Anomalies in aircraft engine performance can lead to catastrophic accidents. To prevent such incidents, pre-flight engine performance testing is conducted using multiple sensors. These sensors transmit data to the "Motor Engine Monitoring and Supervision" software, which displays the data graphically and stores it.
